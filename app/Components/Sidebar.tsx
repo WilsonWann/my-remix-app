@@ -2,13 +2,23 @@ import { Form, NavLink, useNavigation, useSubmit } from '@remix-run/react'
 import React, { useEffect } from 'react'
 import { ContactRecord } from '../data'
 
+import {
+  Drawer,
+  DrawerBody,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerOverlay,
+  DrawerContent,
+  DrawerCloseButton
+} from '@chakra-ui/react'
+
 type Props = {
   children: React.ReactNode
   contacts: ContactRecord[]
   q: string | null
 }
 
-const Drawer = (props: Props) => {
+const Sidebar = (props: Props) => {
   const { children, contacts, q } = props
 
   const navigation = useNavigation()
@@ -96,4 +106,4 @@ const Drawer = (props: Props) => {
   )
 }
 
-export default Drawer
+export default Sidebar

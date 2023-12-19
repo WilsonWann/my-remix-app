@@ -16,7 +16,7 @@ import {
 } from '@remix-run/react'
 
 import appStylesHref from './app.css'
-import Drawer from './Components/Drawer'
+import Sidebar from './Components/Sidebar'
 import { createEmptyContact, getContacts } from './data'
 
 export let links: LinksFunction = () => [{ rel: 'stylesheet', href: appStylesHref }]
@@ -110,12 +110,12 @@ const Document = withEmotionCache(({ children }: DocumentProps, emotionCache) =>
           colorModeManager={cookieStorageManagerSSR(cookies)}
           theme={theme}
         >
-          <Drawer
+          <Sidebar
             contacts={contacts}
             q={q}
           >
             {children}
-          </Drawer>
+          </Sidebar>
         </ChakraProvider>
         <ScrollRestoration />
         <Scripts />
