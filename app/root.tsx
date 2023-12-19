@@ -1,4 +1,8 @@
-import { useEffect } from 'react'
+import React, { useContext, useEffect } from 'react'
+import { withEmotionCache } from '@emotion/react'
+import { ChakraProvider } from '@chakra-ui/react'
+import { ServerStyleContext, ClientStyleContext } from './context'
+
 import type { LinksFunction, LoaderFunctionArgs } from '@remix-run/node'
 import { json, redirect } from '@remix-run/node'
 import {
@@ -18,9 +22,7 @@ import {
 import appStylesHref from './app.css'
 import { createEmptyContact, getContacts } from './data'
 
-export const links: LinksFunction = () => [
-  { rel: 'stylesheet', href: appStylesHref }
-]
+export let links: LinksFunction = () => [{ rel: 'stylesheet', href: appStylesHref }]
 
 export const action = async () => {
   const contact = await createEmptyContact()
@@ -34,13 +36,18 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   return json({ contacts, q })
 }
 
-export default function App() {
+interface DocumentProps {
+  children: React.ReactNode
+}
+
+const Document = withEmotionCache(({ children }: DocumentProps, emotionCache) => {
+  const serverStyleData = useContext(ServerStyleContext)
+  const clientStyleData = useContext(ClientStyleContext)
+
   const { contacts, q } = useLoaderData<typeof loader>()
   const navigation = useNavigation()
   const submit = useSubmit()
-  const searching =
-    navigation.location &&
-    new URLSearchParams(navigation.location.search).has('q')
+  const searching = navigation.location && new URLSearchParams(navigation.location.search).has('q')
 
   useEffect(() => {
     const searchField = document.getElementById('q')
@@ -48,6 +55,20 @@ export default function App() {
       searchField.value = q || ''
     }
   }, [q])
+
+  // Only executed on client
+  useEffect(() => {
+    // re-link sheet container
+    emotionCache.sheet.container = document.head
+    // rer-inject tags
+    const tags = emotionCache.sheet.tags
+    emotionCache.sheet.flush()
+    tags.forEach((tag) => {
+      ;(emotionCache.sheet as any)._insertTag(tag)
+    })
+    // reset cache to reapply global styles
+    clientStyleData?.reset()
+  }, [])
 
   return (
     <html lang='en'>
@@ -59,6 +80,13 @@ export default function App() {
         />
         <Meta />
         <Links />
+        {serverStyleData?.map(({ key, ids, css }) => (
+          <style
+            key={key}
+            data-emotion={`${key} ${ids.join(' ')}`}
+            dangerouslySetInnerHTML={{ __html: css }}
+          />
+        ))}
       </head>
       <body>
         <div id='sidebar'>
@@ -124,12 +152,10 @@ export default function App() {
           </nav>
         </div>
         <div
-          className={
-            navigation.state === 'loading' && !searching ? 'loading' : ''
-          }
+          className={navigation.state === 'loading' && !searching ? 'loading' : ''}
           id='detail'
         >
-          <Outlet />
+          {children}
         </div>
 
         <ScrollRestoration />
@@ -137,5 +163,15 @@ export default function App() {
         <LiveReload />
       </body>
     </html>
+  )
+})
+
+export default function App() {
+  return (
+    <Document>
+      <ChakraProvider>
+        <Outlet />
+      </ChakraProvider>
+    </Document>
   )
 }
