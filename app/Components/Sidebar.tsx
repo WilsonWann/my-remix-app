@@ -26,6 +26,7 @@ import {
   Text
 } from '@chakra-ui/react'
 import ChakraNavLink from './ChakraNavLink'
+import { useTheme } from '@emotion/react'
 
 type Props = {
   searching: boolean
@@ -35,7 +36,6 @@ type Props = {
 
 const Sidebar = (props: Props) => {
   const { searching, contacts, q } = props
-
   const submit = useSubmit()
 
   const { isOpen, onOpen, onClose } = useDisclosure()
@@ -49,7 +49,10 @@ const Sidebar = (props: Props) => {
   }, [q])
 
   return (
-    <Container id='sidebar'>
+    <Container
+      as='div'
+      id='sidebar'
+    >
       <Heading as='h1'>Remix Contacts</Heading>
       <Box>
         <Form
@@ -80,7 +83,13 @@ const Sidebar = (props: Props) => {
           />
         </Form>
         <Form method='post'>
-          <Button type='submit'>New</Button>
+          <Button
+            colorScheme='gray'
+            color='black'
+            type='submit'
+          >
+            New
+          </Button>
         </Form>
       </Box>
       <Box as='nav'>
@@ -95,6 +104,7 @@ const Sidebar = (props: Props) => {
               <Box
                 as='li'
                 h='40px'
+                w={'100%'}
                 key={contact.id}
               >
                 <ChakraNavLink to={`contacts/${contact.id}`}>

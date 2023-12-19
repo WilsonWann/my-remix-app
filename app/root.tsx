@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useMemo } from 'react'
 import { withEmotionCache } from '@emotion/react'
-import { extendTheme, ChakraProvider, cookieStorageManagerSSR } from '@chakra-ui/react'
+import { extendTheme, ChakraProvider, cookieStorageManagerSSR, Container } from '@chakra-ui/react'
 import { ServerStyleContext, ClientStyleContext } from './context'
 
 import type { LinksFunction, LoaderFunctionArgs } from '@remix-run/node'
@@ -53,7 +53,7 @@ const Document = withEmotionCache(({ children }: DocumentProps, emotionCache) =>
     ? new URLSearchParams(navigation.location.search).has('q')
     : false
 
-  const DEFAULT_COLOR_MODE: 'dark' | 'light' | null = 'dark'
+  const DEFAULT_COLOR_MODE: 'dark' | 'light' | null = 'light'
 
   const CHAKRA_COOKIE_COLOR_KEY = 'chakra-ui-color-mode'
 
@@ -121,12 +121,17 @@ const Document = withEmotionCache(({ children }: DocumentProps, emotionCache) =>
             searching={searching}
             q={q}
           />
-          <div
-            className={navigation.state === 'loading' && !searching ? 'loading' : ''}
+          <Container
+            as='div'
             id='detail'
+            m={0}
+            display={'flex'}
+            flexDirection={'column'}
+            alignItems={'flex-start'}
+            maxW={'fit-content'}
           >
             {children}
-          </div>
+          </Container>
         </ChakraProvider>
         <ScrollRestoration />
         <Scripts />

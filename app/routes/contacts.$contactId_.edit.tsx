@@ -3,7 +3,21 @@ import { json, redirect } from '@remix-run/node'
 import { Form, useLoaderData, useNavigate } from '@remix-run/react'
 import invariant from 'tiny-invariant'
 
+import {
+  FormControl,
+  FormLabel,
+  FormErrorMessage,
+  FormHelperText,
+  Input,
+  Box,
+  Textarea,
+  ButtonGroup,
+  Button
+} from '@chakra-ui/react'
+
 import { getContact, updateContact } from '../data'
+import NormalButton from './Components/NormalButton'
+import SuccessButton from './Components/SuccessButton'
 
 export const action = async ({ params, request }: ActionFunctionArgs) => {
   invariant(params.contactId, 'Missing contactId param')
@@ -26,64 +40,81 @@ export default function EditContact() {
   const { contact } = useLoaderData<typeof loader>()
   const navigate = useNavigate()
 
+  //! px: bad design
   return (
     <Form
       id='contact-form'
       method='post'
     >
-      <p>
-        <span>Name</span>
-        <input
-          defaultValue={contact.first}
-          aria-label='First name'
-          name='first'
-          type='text'
-          placeholder='First'
-        />
-        <input
-          aria-label='Last name'
-          defaultValue={contact.last}
-          name='last'
-          placeholder='Last'
-          type='text'
-        />
-      </p>
-      <label>
-        <span>Twitter</span>
-        <input
+      <MyFormControl>
+        <FormLabel>Name</FormLabel>
+        <Box
+          as='div'
+          display='flex'
+          gap='4'
+        >
+          <Input
+            defaultValue={contact.first}
+            aria-label='First name'
+            name='first'
+            type='text'
+            placeholder='First'
+          />
+          <Input
+            aria-label='Last name'
+            defaultValue={contact.last}
+            name='last'
+            placeholder='Last'
+            type='text'
+          />
+        </Box>
+      </MyFormControl>
+      <MyFormControl>
+        <FormLabel>Twitter</FormLabel>
+        <Input
           defaultValue={contact.twitter}
           name='twitter'
           placeholder='@jack'
           type='text'
         />
-      </label>
-      <label>
-        <span>Avatar URL</span>
-        <input
+      </MyFormControl>
+      <MyFormControl>
+        <FormLabel>Avatar URL</FormLabel>
+        <Input
           aria-label='Avatar URL'
           defaultValue={contact.avatar}
           name='avatar'
           placeholder='https://example.com/avatar.jpg'
           type='text'
         />
-      </label>
-      <label>
-        <span>Notes</span>
-        <textarea
+      </MyFormControl>
+      <MyFormControl>
+        <FormLabel>Notes</FormLabel>
+        <Textarea
           defaultValue={contact.notes}
           name='notes'
           rows={6}
         />
-      </label>
-      <p>
-        <button type='submit'>Save</button>
-        <button
+      </MyFormControl>
+      <ButtonGroup>
+        <SuccessButton text='Save' />
+        {/* <Button type='submit'>Save</Button> */}
+        <NormalButton
           onClick={() => navigate(-1)}
-          type='button'
-        >
-          Cancel
-        </button>
-      </p>
+          text={'Cancel'}
+        />
+      </ButtonGroup>
     </Form>
+  )
+}
+function MyFormControl({ children }: { children: React.ReactNode }) {
+  return (
+    <FormControl
+      display='flex'
+      flexDirection={'row'}
+      gap={'4'}
+    >
+      {children}
+    </FormControl>
   )
 }

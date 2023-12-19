@@ -6,6 +6,10 @@ import type { FunctionComponent } from 'react'
 
 import type { ContactRecord } from '../data'
 import { getContact, updateContact } from '../data'
+import { Box, ButtonGroup, Container, Heading, Image } from '@chakra-ui/react'
+import ChakraNavLink from '~/Components/ChakraNavLink'
+import NormalButton from './Components/NormalButton'
+import AlertButton from './Components/AlertButton'
 
 export const action = async ({ params, request }: ActionFunctionArgs) => {
   invariant(params.contactId, 'Missing contactId param')
@@ -28,17 +32,24 @@ export default function Contact() {
   const { contact } = useLoaderData<typeof loader>()
 
   return (
-    <div id='contact'>
-      <div>
-        <img
+    <Container
+      id='contact'
+      gap='4'
+      p={0}
+    >
+      <Box as='div'>
+        <Image
           alt={`${contact.first} ${contact.last} avatar`}
           key={contact.avatar}
           src={contact.avatar}
         />
-      </div>
+      </Box>
 
-      <div>
-        <h1>
+      <Box as='div'>
+        <Heading
+          as='h1'
+          noOfLines={1}
+        >
           {contact.first || contact.last ? (
             <>
               {contact.first} {contact.last}
@@ -47,40 +58,41 @@ export default function Contact() {
             <i>No Name</i>
           )}{' '}
           <Favorite contact={contact} />
-        </h1>
+        </Heading>
 
         {contact.twitter ? (
-          <p>
-            <a href={`https://twitter.com/${contact.twitter}`}>
+          <Box as='p'>
+            <ChakraNavLink
+              isExternal={true}
+              to={`https://twitter.com/${contact.twitter}`}
+            >
               {contact.twitter}
-            </a>
-          </p>
+            </ChakraNavLink>
+          </Box>
         ) : null}
 
-        {contact.notes ? <p>{contact.notes}</p> : null}
+        {contact.notes ? <Box as='p'>{contact.notes}</Box> : null}
 
-        <div>
+        <ButtonGroup gap='4'>
           <Form action='edit'>
-            <button type='submit'>Edit</button>
+            <NormalButton text='Edit' />
           </Form>
 
           <Form
             action='destroy'
             method='post'
             onSubmit={(event) => {
-              const response = confirm(
-                'Please confirm you want to delete this record.'
-              )
+              const response = confirm('Please confirm you want to delete this record.')
               if (!response) {
                 event.preventDefault()
               }
             }}
           >
-            <button type='submit'>Delete</button>
+            <AlertButton text='Delete' />
           </Form>
-        </div>
-      </div>
-    </div>
+        </ButtonGroup>
+      </Box>
+    </Container>
   )
 }
 
@@ -89,19 +101,18 @@ const Favorite: FunctionComponent<{
 }> = ({ contact }) => {
   const fetcher = useFetcher()
   // const favorite = contact.favorite
-  const favorite = fetcher.formData
-    ? fetcher.formData.get('favorite') === 'true'
-    : contact.favorite
+  const favorite = fetcher.formData ? fetcher.formData.get('favorite') === 'true' : contact.favorite
 
   return (
     <fetcher.Form method='post'>
-      <button
+      <Box
+        as='button'
         aria-label={favorite ? 'Remove from favorites' : 'Add to favorites'}
         name='favorite'
         value={favorite ? 'false' : 'true'}
       >
         {favorite ? '★' : '☆'}
-      </button>
+      </Box>
     </fetcher.Form>
   )
 }
