@@ -12,7 +12,8 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
-  useLoaderData
+  useLoaderData,
+  useNavigation
 } from '@remix-run/react'
 
 import appStylesHref from './app.css'
@@ -47,7 +48,12 @@ const Document = withEmotionCache(({ children }: DocumentProps, emotionCache) =>
     return match === null ? void 0 : match[2]
   }
 
-  const DEFAULT_COLOR_MODE: 'dark' | 'light' | null = 'light'
+  const navigation = useNavigation()
+  const searching = navigation.location
+    ? new URLSearchParams(navigation.location.search).has('q')
+    : false
+
+  const DEFAULT_COLOR_MODE: 'dark' | 'light' | null = 'dark'
 
   const CHAKRA_COOKIE_COLOR_KEY = 'chakra-ui-color-mode'
 
@@ -112,10 +118,15 @@ const Document = withEmotionCache(({ children }: DocumentProps, emotionCache) =>
         >
           <Sidebar
             contacts={contacts}
+            searching={searching}
             q={q}
+          />
+          <div
+            className={navigation.state === 'loading' && !searching ? 'loading' : ''}
+            id='detail'
           >
             {children}
-          </Sidebar>
+          </div>
         </ChakraProvider>
         <ScrollRestoration />
         <Scripts />
