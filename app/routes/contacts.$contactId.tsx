@@ -7,9 +7,9 @@ import type { FunctionComponent } from 'react'
 import type { ContactRecord } from '../data'
 import { getContact, updateContact } from '../data'
 import { Box, ButtonGroup, Container, Heading, Image } from '@chakra-ui/react'
-import ChakraNavLink from '~/Components/ChakraNavLink'
-import NormalButton from './Components/NormalButton'
-import AlertButton from './Components/AlertButton'
+import ChakraNavLink from '~/components/ChakraNavLink'
+import NormalButton from './components/NormalButton'
+import AlertButton from './components/AlertButton'
 
 export const action = async ({ params, request }: ActionFunctionArgs) => {
   invariant(params.contactId, 'Missing contactId param')

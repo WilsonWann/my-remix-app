@@ -17,7 +17,7 @@ import {
 } from '@remix-run/react'
 
 import appStylesHref from './app.css'
-import Sidebar from './Components/Sidebar'
+import Sidebar from './components/Sidebar'
 import { createEmptyContact, getContacts } from './data'
 
 export let links: LinksFunction = () => [{ rel: 'stylesheet', href: appStylesHref }]

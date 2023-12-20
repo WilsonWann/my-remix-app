@@ -16,8 +16,8 @@ import {
 } from '@chakra-ui/react'
 
 import { getContact, updateContact } from '../data'
-import NormalButton from './Components/NormalButton'
-import SuccessButton from './Components/SuccessButton'
+import NormalButton from './components/NormalButton'
+import SuccessButton from './components/SuccessButton'
 
 export const action = async ({ params, request }: ActionFunctionArgs) => {
   invariant(params.contactId, 'Missing contactId param')
