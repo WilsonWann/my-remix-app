@@ -19,12 +19,10 @@ import {
 import appStylesHref from './app.css'
 import Sidebar from './components/Sidebar'
 import { createEmptyContact, getContacts } from './data'
-import Toast from './components/Toast'
 
 import { getToast } from 'remix-toast'
 import { ToastContainer, toast as notify } from 'react-toastify'
 import toastStyles from 'react-toastify/dist/ReactToastify.css'
-import MyAlertDialog from './routes/components/AlertDialog'
 import { ModalProvider } from './hooks/useModals'
 
 export let links: LinksFunction = () => [
@@ -33,6 +31,7 @@ export let links: LinksFunction = () => [
 ]
 
 export const action = async () => {
+  //! add try catch here
   const contact = await createEmptyContact()
   return redirect(`/contacts/${contact.id}/edit`)
 }

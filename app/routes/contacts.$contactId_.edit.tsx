@@ -1,36 +1,22 @@
-import type { ActionFunctionArgs, LinksFunction, LoaderFunctionArgs } from '@remix-run/node'
-import { json, redirect } from '@remix-run/node'
+import type { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/node'
+import { json } from '@remix-run/node'
 import { Form, useLoaderData, useNavigate } from '@remix-run/react'
 import invariant from 'tiny-invariant'
-
 import { Input, Box, Textarea, ButtonGroup } from '@chakra-ui/react'
-
 import { getContact, updateContact } from '../data'
 import NormalButton from './components/NormalButton'
 import SuccessButton from './components/SuccessButton'
 import { useTheme } from '@chakra-ui/react'
 import MyFormControl from './components/MyFormControl'
-
-import { useEffect } from 'react'
-
-// import { getToast, redirectWithInfo, redirectWithSuccess } from 'remix-toast'
-import { ToastContainer, toast as notify } from 'react-toastify'
-import { redirectWithInfo } from 'node_modules/remix-toast/dist/index.cjs'
-import { redirectWithError, redirectWithSuccess } from 'remix-toast'
-// import toastStyles from 'react-toastify/dist/ReactToastify.css'
-
-// export const links: LinksFunction = () => [{ rel: 'stylesheet', href: toastStyles }]
+import { redirectWithSuccess } from 'remix-toast'
 
 export const action = async ({ params, request }: ActionFunctionArgs) => {
   invariant(params.contactId, 'Missing contactId param')
   const formData = await request.formData()
   const updates = Object.fromEntries(formData)
+  //! add try catch here
   await updateContact(params.contactId, updates)
-  // return redirectWithError(`/contacts/${params.contactId}`, 'Error!')
-  return redirectWithSuccess(
-    `/contacts/${params.contactId}`,
-    'Your form was submitted successfully'
-  )
+  return redirectWithSuccess(`/contacts/${params.contactId}`, '儲存成功！')
 }
 
 export const loader = async ({ params, request }: LoaderFunctionArgs) => {

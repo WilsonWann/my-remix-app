@@ -15,6 +15,7 @@ import { FormEvent } from 'react'
 export const action = async ({ params, request }: ActionFunctionArgs) => {
   invariant(params.contactId, 'Missing contactId param')
   const formData = await request.formData()
+  //! add try catch here
   return updateContact(params.contactId, {
     favorite: formData.get('favorite') === 'true'
   })
@@ -37,7 +38,14 @@ export default function Contact() {
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    const response = await confirm('Are you sure you want to delete this contact?')
+    const response = await confirm('確定要移除這筆資料嗎?', {
+      okText: '確定',
+      cancelText: '取消',
+      icon: '★',
+      modalProps: { isCentered: true, closeOnOverlayClick: false },
+      okButtonProps: { colorScheme: 'red', color: 'white' },
+      cancelButtonProps: { colorScheme: 'gray', color: 'black' }
+    })
     if (!response) return
     submit({ contactId: contact.id }, { action: 'destroy', method: 'DELETE' })
   }
@@ -76,11 +84,11 @@ export default function Contact() {
 
         <ButtonGroup gap='4'>
           <Form action='edit'>
-            <NormalButton text='Edit' />
+            <NormalButton text='編輯' />
           </Form>
 
           <Form action='destroy' method='post' onSubmit={handleSubmit}>
-            <AlertButton text='Delete' />
+            <AlertButton text='刪除' />
           </Form>
         </ButtonGroup>
       </Box>

@@ -1,21 +1,9 @@
-import { Form, useNavigation, useSubmit } from '@remix-run/react'
+import { Form, useSubmit } from '@remix-run/react'
 import React, { useEffect } from 'react'
 import { ContactRecord } from '../data'
 
 import {
-  Drawer,
-  DrawerBody,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerOverlay,
-  DrawerContent,
-  DrawerCloseButton,
-  Button,
   useDisclosure,
-  FormControl,
-  FormLabel,
-  FormErrorMessage,
-  FormHelperText,
   Input,
   VStack,
   StackDivider,
@@ -26,7 +14,7 @@ import {
   Text
 } from '@chakra-ui/react'
 import ChakraNavLink from './ChakraNavLink'
-import { useTheme } from '@emotion/react'
+import NormalButton from '~/routes/components/NormalButton'
 
 type Props = {
   searching: boolean
@@ -49,10 +37,7 @@ const Sidebar = (props: Props) => {
   }, [q])
 
   return (
-    <Container
-      as='div'
-      id='sidebar'
-    >
+    <Container as='div' id='sidebar'>
       <Heading as='h1'>Remix Contacts</Heading>
       <Box>
         <Form
@@ -70,26 +55,14 @@ const Sidebar = (props: Props) => {
             defaultValue={q || ''}
             className={searching ? 'loading' : ''}
             aria-label='Search contacts'
-            placeholder='Search'
+            placeholder=''
             type='search'
             name='q'
           />
-          <Spinner
-            id='search-spinner'
-            size='xs'
-            aria-hidden
-            speed={'0.6s'}
-            hidden={!searching}
-          />
+          <Spinner id='search-spinner' size='xs' aria-hidden speed={'0.6s'} hidden={!searching} />
         </Form>
         <Form method='post'>
-          <Button
-            colorScheme='gray'
-            color='black'
-            type='submit'
-          >
-            New
-          </Button>
+          <NormalButton text={'新增'} />
         </Form>
       </Box>
       <Box as='nav'>
@@ -101,12 +74,7 @@ const Sidebar = (props: Props) => {
             alignItems={'flex-start'}
           >
             {contacts.map((contact) => (
-              <Box
-                as='li'
-                h='40px'
-                w={'100%'}
-                key={contact.id}
-              >
+              <Box as='li' h='40px' w={'100%'} key={contact.id}>
                 <ChakraNavLink to={`contacts/${contact.id}`}>
                   {contact.first || contact.last ? (
                     <>
