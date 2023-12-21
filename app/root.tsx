@@ -19,8 +19,18 @@ import {
 import appStylesHref from './app.css'
 import Sidebar from './components/Sidebar'
 import { createEmptyContact, getContacts } from './data'
+import Toast from './components/Toast'
 
-export let links: LinksFunction = () => [{ rel: 'stylesheet', href: appStylesHref }]
+import { getToast } from 'remix-toast'
+import { ToastContainer, toast as notify } from 'react-toastify'
+import toastStyles from 'react-toastify/dist/ReactToastify.css'
+import MyAlertDialog from './routes/components/AlertDialog'
+import { ModalProvider } from './hooks/useModals'
+
+export let links: LinksFunction = () => [
+  { rel: 'stylesheet', href: appStylesHref },
+  { rel: 'stylesheet', href: toastStyles }
+]
 
 export const action = async () => {
   const contact = await createEmptyContact()
@@ -28,11 +38,14 @@ export const action = async () => {
 }
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
+  // Extracts the toast from the request
+  const { toast, headers } = await getToast(request)
   const url = new URL(request.url)
   const q = url.searchParams.get('q')
   const contacts = await getContacts(q)
   const cookies = request.headers.get('cookie') ?? ''
-  return json({ contacts, q, cookies })
+  // Important to pass in the headers so the toast is cleared properly
+  return json({ contacts, q, cookies, toast }, { headers })
 }
 
 interface DocumentProps {
@@ -58,6 +71,26 @@ const Document = withEmotionCache(({ children }: DocumentProps, emotionCache) =>
   const CHAKRA_COOKIE_COLOR_KEY = 'chakra-ui-color-mode'
 
   const { contacts, q } = useLoaderData<typeof loader>()
+
+  const { toast } = useLoaderData<typeof loader>()
+  console.log('🚀 ~ file: root.tsx:157 ~ Root ~ toast:', toast)
+
+  useEffect(() => {
+    if (!toast) return
+    if (toast.type === 'error') {
+      notify.error(toast.message)
+    }
+    if (toast.type === 'success') {
+      notify.success(toast.message)
+    }
+    if (toast.type === 'info') {
+      notify.info(toast.message)
+    }
+    if (toast.type === 'warning') {
+      notify.warn(toast.message)
+    }
+  }, [toast])
+
   let { cookies } = useLoaderData<typeof loader>()
 
   if (typeof document !== 'undefined') {
@@ -93,10 +126,7 @@ const Document = withEmotionCache(({ children }: DocumentProps, emotionCache) =>
     <html lang='en'>
       <head>
         <meta charSet='utf-8' />
-        <meta
-          name='viewport'
-          content='width=device-width, initial-scale=1'
-        />
+        <meta name='viewport' content='width=device-width, initial-scale=1' />
         <Meta />
         <Links />
         {serverStyleData?.map(({ key, ids, css }) => (
@@ -112,15 +142,14 @@ const Document = withEmotionCache(({ children }: DocumentProps, emotionCache) =>
           className: `chakra-ui-${colorMode}`
         })}
       >
-        <ChakraProvider
-          colorModeManager={cookieStorageManagerSSR(cookies)}
-          theme={theme}
-        >
-          <Sidebar
-            contacts={contacts}
-            searching={searching}
-            q={q}
-          />
+        <ToastContainer
+          position={'bottom-center'}
+          autoClose={1500}
+          hideProgressBar={false}
+          theme={'light'}
+        />
+        <ChakraProvider colorModeManager={cookieStorageManagerSSR(cookies)} theme={theme}>
+          <Sidebar contacts={contacts} searching={searching} q={q} />
           <Container
             as='div'
             id='detail'
@@ -151,11 +180,13 @@ const colors = {
 
 const theme = extendTheme({ colors })
 
-export default function App() {
+export default function Root() {
   return (
     <Document>
       <ChakraProvider theme={theme}>
-        <Outlet />
+        <ModalProvider>
+          <Outlet />
+        </ModalProvider>
       </ChakraProvider>
     </Document>
   )

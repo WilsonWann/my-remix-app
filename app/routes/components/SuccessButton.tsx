@@ -2,10 +2,11 @@ import { Button } from '@chakra-ui/react'
 
 type Props = {
   text: string
+  onClick?: () => void
 }
 
 const SuccessButton = (props: Props) => {
-  const { text } = props
+  const { text, onClick } = props
   return (
     <Button
       bg='hsl(224, 98%, 58%)'
@@ -14,6 +15,7 @@ const SuccessButton = (props: Props) => {
       }}
       color='white'
       type='submit'
+      onClick={onClick}
     >
       {text}
     </Button>

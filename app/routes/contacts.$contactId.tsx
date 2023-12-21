@@ -1,15 +1,16 @@
 import type { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/node'
 import invariant from 'tiny-invariant'
 import { json } from '@remix-run/node'
-import { Form, useFetcher, useLoaderData } from '@remix-run/react'
-import type { FunctionComponent } from 'react'
+import { Form, useLoaderData, useSubmit } from '@remix-run/react'
 
-import type { ContactRecord } from '../data'
 import { getContact, updateContact } from '../data'
 import { Box, ButtonGroup, Container, Heading, Image } from '@chakra-ui/react'
-import ChakraNavLink from '~/components/ChakraNavLink'
+import ChakraNavLink from '../components/ChakraNavLink'
 import NormalButton from './components/NormalButton'
 import AlertButton from './components/AlertButton'
+import Favorite from './components/Favorite'
+import useModals from '../hooks/useModals'
+import { FormEvent } from 'react'
 
 export const action = async ({ params, request }: ActionFunctionArgs) => {
   invariant(params.contactId, 'Missing contactId param')
@@ -31,12 +32,18 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 export default function Contact() {
   const { contact } = useLoaderData<typeof loader>()
 
+  const submit = useSubmit()
+  const { confirm } = useModals()
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    const response = await confirm('Are you sure you want to delete this contact?')
+    if (!response) return
+    submit({ contactId: contact.id }, { action: 'destroy', method: 'DELETE' })
+  }
+
   return (
-    <Container
-      id='contact'
-      gap='4'
-      p={0}
-    >
+    <Container id='contact' gap='4' p={0}>
       <Box as='div'>
         <Image
           alt={`${contact.first} ${contact.last} avatar`}
@@ -46,10 +53,7 @@ export default function Contact() {
       </Box>
 
       <Box as='div'>
-        <Heading
-          as='h1'
-          noOfLines={1}
-        >
+        <Heading as='h1' noOfLines={1}>
           {contact.first || contact.last ? (
             <>
               {contact.first} {contact.last}
@@ -62,10 +66,7 @@ export default function Contact() {
 
         {contact.twitter ? (
           <Box as='p'>
-            <ChakraNavLink
-              isExternal={true}
-              to={`https://twitter.com/${contact.twitter}`}
-            >
+            <ChakraNavLink isExternal={true} to={`https://twitter.com/${contact.twitter}`}>
               {contact.twitter}
             </ChakraNavLink>
           </Box>
@@ -78,41 +79,11 @@ export default function Contact() {
             <NormalButton text='Edit' />
           </Form>
 
-          <Form
-            action='destroy'
-            method='post'
-            onSubmit={(event) => {
-              const response = confirm('Please confirm you want to delete this record.')
-              if (!response) {
-                event.preventDefault()
-              }
-            }}
-          >
+          <Form action='destroy' method='post' onSubmit={handleSubmit}>
             <AlertButton text='Delete' />
           </Form>
         </ButtonGroup>
       </Box>
     </Container>
-  )
-}
-
-const Favorite: FunctionComponent<{
-  contact: Pick<ContactRecord, 'favorite'>
-}> = ({ contact }) => {
-  const fetcher = useFetcher()
-  // const favorite = contact.favorite
-  const favorite = fetcher.formData ? fetcher.formData.get('favorite') === 'true' : contact.favorite
-
-  return (
-    <fetcher.Form method='post'>
-      <Box
-        as='button'
-        aria-label={favorite ? 'Remove from favorites' : 'Add to favorites'}
-        name='favorite'
-        value={favorite ? 'false' : 'true'}
-      >
-        {favorite ? '★' : '☆'}
-      </Box>
-    </fetcher.Form>
   )
 }

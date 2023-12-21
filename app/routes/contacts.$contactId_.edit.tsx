@@ -1,59 +1,67 @@
-import type { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/node'
+import type { ActionFunctionArgs, LinksFunction, LoaderFunctionArgs } from '@remix-run/node'
 import { json, redirect } from '@remix-run/node'
 import { Form, useLoaderData, useNavigate } from '@remix-run/react'
 import invariant from 'tiny-invariant'
 
-import {
-  FormControl,
-  FormLabel,
-  FormErrorMessage,
-  FormHelperText,
-  Input,
-  Box,
-  Textarea,
-  ButtonGroup,
-  Button
-} from '@chakra-ui/react'
+import { Input, Box, Textarea, ButtonGroup } from '@chakra-ui/react'
 
 import { getContact, updateContact } from '../data'
 import NormalButton from './components/NormalButton'
 import SuccessButton from './components/SuccessButton'
+import { useTheme } from '@chakra-ui/react'
+import MyFormControl from './components/MyFormControl'
+
+import { useEffect } from 'react'
+
+// import { getToast, redirectWithInfo, redirectWithSuccess } from 'remix-toast'
+import { ToastContainer, toast as notify } from 'react-toastify'
+import { redirectWithInfo } from 'node_modules/remix-toast/dist/index.cjs'
+import { redirectWithError, redirectWithSuccess } from 'remix-toast'
+// import toastStyles from 'react-toastify/dist/ReactToastify.css'
+
+// export const links: LinksFunction = () => [{ rel: 'stylesheet', href: toastStyles }]
 
 export const action = async ({ params, request }: ActionFunctionArgs) => {
   invariant(params.contactId, 'Missing contactId param')
   const formData = await request.formData()
   const updates = Object.fromEntries(formData)
   await updateContact(params.contactId, updates)
-  return redirect(`/contacts/${params.contactId}`)
+  // return redirectWithError(`/contacts/${params.contactId}`, 'Error!')
+  return redirectWithSuccess(
+    `/contacts/${params.contactId}`,
+    'Your form was submitted successfully'
+  )
 }
 
-export const loader = async ({ params }: LoaderFunctionArgs) => {
+export const loader = async ({ params, request }: LoaderFunctionArgs) => {
   invariant(params.contactId, 'Missing contactId param')
+
+  // const { toast, headers } = await getToast(request)
   const contact = await getContact(params.contactId)
   if (!contact) {
     throw new Response('Not Found', { status: 404 })
   }
   return json({ contact })
+  // return json({ contact, toast }, { headers })
 }
 
 export default function EditContact() {
+  // const { contact, toast } = useLoaderData<typeof loader>()
   const { contact } = useLoaderData<typeof loader>()
+  // console.log('🚀 ~ file: contacts.$contactId_.edit.tsx:42 ~ EditContact ~ toast:', toast)
+
   const navigate = useNavigate()
 
-  //! px: bad design
+  const theme = useTheme()
+
+  const height = theme.sizes[10]
+
   return (
-    <Form
-      id='contact-form'
-      method='post'
-    >
-      <MyFormControl>
-        <FormLabel>Name</FormLabel>
-        <Box
-          as='div'
-          display='flex'
-          gap='4'
-        >
+    <Form id='contact-form' method='post'>
+      <MyFormControl height={height} label={'Name'}>
+        <Box as='div' display='flex' gap='4' h={'fit-content'}>
           <Input
+            h={height}
             defaultValue={contact.first}
             aria-label='First name'
             name='first'
@@ -61,6 +69,7 @@ export default function EditContact() {
             placeholder='First'
           />
           <Input
+            h={height}
             aria-label='Last name'
             defaultValue={contact.last}
             name='last'
@@ -69,18 +78,18 @@ export default function EditContact() {
           />
         </Box>
       </MyFormControl>
-      <MyFormControl>
-        <FormLabel>Twitter</FormLabel>
+      <MyFormControl height={height} label={'Twitter'}>
         <Input
+          h={height}
           defaultValue={contact.twitter}
           name='twitter'
           placeholder='@jack'
           type='text'
         />
       </MyFormControl>
-      <MyFormControl>
-        <FormLabel>Avatar URL</FormLabel>
+      <MyFormControl height={height} label={'Avatar URL'}>
         <Input
+          h={height}
           aria-label='Avatar URL'
           defaultValue={contact.avatar}
           name='avatar'
@@ -88,33 +97,13 @@ export default function EditContact() {
           type='text'
         />
       </MyFormControl>
-      <MyFormControl>
-        <FormLabel>Notes</FormLabel>
-        <Textarea
-          defaultValue={contact.notes}
-          name='notes'
-          rows={6}
-        />
+      <MyFormControl height={height} label={'Notes'}>
+        <Textarea defaultValue={contact.notes} name='notes' rows={6} />
       </MyFormControl>
-      <ButtonGroup>
+      <ButtonGroup display={'flex'} justifyContent={'flex-end'}>
         <SuccessButton text='Save' />
-        {/* <Button type='submit'>Save</Button> */}
-        <NormalButton
-          onClick={() => navigate(-1)}
-          text={'Cancel'}
-        />
+        <NormalButton onClick={() => navigate(-1)} text={'Cancel'} />
       </ButtonGroup>
     </Form>
-  )
-}
-function MyFormControl({ children }: { children: React.ReactNode }) {
-  return (
-    <FormControl
-      display='flex'
-      flexDirection={'row'}
-      gap={'4'}
-    >
-      {children}
-    </FormControl>
   )
 }
