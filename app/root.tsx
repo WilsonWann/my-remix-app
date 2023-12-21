@@ -24,6 +24,7 @@ import { getToast } from 'remix-toast'
 import { ToastContainer, toast as notify } from 'react-toastify'
 import toastStyles from 'react-toastify/dist/ReactToastify.css'
 import { ModalProvider } from './hooks/useModals'
+import ContainerLayout from './components/ContainerLayout'
 
 export let links: LinksFunction = () => [
   { rel: 'stylesheet', href: appStylesHref },
@@ -72,7 +73,6 @@ const Document = withEmotionCache(({ children }: DocumentProps, emotionCache) =>
   const { contacts, q } = useLoaderData<typeof loader>()
 
   const { toast } = useLoaderData<typeof loader>()
-  console.log('🚀 ~ file: root.tsx:157 ~ Root ~ toast:', toast)
 
   useEffect(() => {
     if (!toast) return
@@ -149,17 +149,7 @@ const Document = withEmotionCache(({ children }: DocumentProps, emotionCache) =>
         />
         <ChakraProvider colorModeManager={cookieStorageManagerSSR(cookies)} theme={theme}>
           <Sidebar contacts={contacts} searching={searching} q={q} />
-          <Container
-            as='div'
-            id='detail'
-            m={0}
-            display={'flex'}
-            flexDirection={'column'}
-            alignItems={'flex-start'}
-            maxW={'fit-content'}
-          >
-            {children}
-          </Container>
+          <ContainerLayout>{children}</ContainerLayout>
         </ChakraProvider>
         <ScrollRestoration />
         <Scripts />
@@ -177,7 +167,16 @@ const colors = {
   }
 }
 
-const theme = extendTheme({ colors })
+const styles = {
+  global: {
+    body: {
+      sidebarWidth: '22rem'
+    }
+  }
+}
+
+const theme = extendTheme({ colors, styles })
+// console.log('🚀 ~ file: root.tsx:180 ~ theme:', theme)
 
 export default function Root() {
   return (

@@ -11,7 +11,8 @@ import {
   Spinner,
   Container,
   Heading,
-  Text
+  Text,
+  useTheme
 } from '@chakra-ui/react'
 import ChakraNavLink from './ChakraNavLink'
 import NormalButton from '~/routes/components/NormalButton'
@@ -25,6 +26,7 @@ type Props = {
 const Sidebar = (props: Props) => {
   const { searching, contacts, q } = props
   const submit = useSubmit()
+  const theme = useTheme()
 
   const { isOpen, onOpen, onClose } = useDisclosure()
   const btnRef = React.useRef<HTMLButtonElement | null>(null)
@@ -37,7 +39,7 @@ const Sidebar = (props: Props) => {
   }, [q])
 
   return (
-    <Container as='div' id='sidebar'>
+    <Container as='div' id='sidebar' width={theme.styles.global.body.sidebarWidth}>
       <Heading as='h1'>Remix Contacts</Heading>
       <Box>
         <Form

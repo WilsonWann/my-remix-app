@@ -41,7 +41,7 @@ export default function Contact() {
     const response = await confirm('確定要移除這筆資料嗎?', {
       okText: '確定',
       cancelText: '取消',
-      icon: '★',
+      icon: <span style={{ color: 'red' }}>★</span>,
       modalProps: { isCentered: true, closeOnOverlayClick: false },
       okButtonProps: { colorScheme: 'red', color: 'white' },
       cancelButtonProps: { colorScheme: 'gray', color: 'black' }

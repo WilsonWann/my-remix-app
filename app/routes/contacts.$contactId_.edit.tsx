@@ -22,19 +22,15 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
 export const loader = async ({ params, request }: LoaderFunctionArgs) => {
   invariant(params.contactId, 'Missing contactId param')
 
-  // const { toast, headers } = await getToast(request)
   const contact = await getContact(params.contactId)
   if (!contact) {
     throw new Response('Not Found', { status: 404 })
   }
   return json({ contact })
-  // return json({ contact, toast }, { headers })
 }
 
 export default function EditContact() {
-  // const { contact, toast } = useLoaderData<typeof loader>()
   const { contact } = useLoaderData<typeof loader>()
-  // console.log('🚀 ~ file: contacts.$contactId_.edit.tsx:42 ~ EditContact ~ toast:', toast)
 
   const navigate = useNavigate()
 
