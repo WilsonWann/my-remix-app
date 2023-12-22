@@ -1,6 +1,7 @@
-import React, { useContext, useEffect, useMemo } from 'react'
+import React, { useContext, useEffect, useMemo, useState } from 'react'
 import { withEmotionCache } from '@emotion/react'
 import { extendTheme, ChakraProvider, cookieStorageManagerSSR, Container } from '@chakra-ui/react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ServerStyleContext, ClientStyleContext } from './context'
 
 import type { LinksFunction, LoaderFunctionArgs } from '@remix-run/node'
@@ -179,14 +180,29 @@ const styles = {
 const theme = extendTheme({ colors, styles })
 
 export default function Root() {
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            // With SSR, we usually want to set some default staleTime
+            // above 0 to avoid refetching immediately on the client
+            staleTime: 60 * 1000
+          }
+        }
+      })
+  )
+
   return (
     <Document>
       <ChakraProvider theme={theme}>
-        <ModalProvider>
-          <ImageModalProvider>
-            <Outlet />
-          </ImageModalProvider>
-        </ModalProvider>
+        <QueryClientProvider client={queryClient}>
+          <ModalProvider>
+            <ImageModalProvider>
+              <Outlet />
+            </ImageModalProvider>
+          </ModalProvider>
+        </QueryClientProvider>
       </ChakraProvider>
     </Document>
   )
