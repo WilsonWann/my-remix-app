@@ -1,9 +1,7 @@
 import React, { useContext, useEffect, useMemo, useState } from 'react'
 import { withEmotionCache } from '@emotion/react'
 import { extendTheme, ChakraProvider, cookieStorageManagerSSR, Container } from '@chakra-ui/react'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ServerStyleContext, ClientStyleContext } from './context'
-
 import type { LinksFunction, LoaderFunctionArgs } from '@remix-run/node'
 import { json, redirect } from '@remix-run/node'
 import {
@@ -27,6 +25,10 @@ import toastStyles from 'react-toastify/dist/ReactToastify.css'
 import { ModalProvider } from './hooks/useModals'
 import ContainerLayout from './components/ContainerLayout'
 import { ImageModalProvider } from './hooks/useImageModal'
+
+import { HydrationBoundary, QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+import { useDehydratedState } from 'use-dehydrated-state'
 
 export let links: LinksFunction = () => [
   { rel: 'stylesheet', href: appStylesHref },
@@ -193,15 +195,20 @@ export default function Root() {
       })
   )
 
+  const dehydratedState = useDehydratedState()
+
   return (
     <Document>
       <ChakraProvider theme={theme}>
         <QueryClientProvider client={queryClient}>
-          <ModalProvider>
-            <ImageModalProvider>
-              <Outlet />
-            </ImageModalProvider>
-          </ModalProvider>
+          <ReactQueryDevtools initialIsOpen={false} />
+          <HydrationBoundary state={dehydratedState}>
+            <ModalProvider>
+              <ImageModalProvider>
+                <Outlet />
+              </ImageModalProvider>
+            </ModalProvider>
+          </HydrationBoundary>
         </QueryClientProvider>
       </ChakraProvider>
     </Document>

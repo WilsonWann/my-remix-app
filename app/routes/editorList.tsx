@@ -1,4 +1,4 @@
-import { LoaderFunctionArgs, json } from '@remix-run/node'
+import { json } from '@remix-run/node'
 import { useLoaderData } from '@remix-run/react'
 import { fetchEditorList } from '~/utils/editorList.server'
 
@@ -6,19 +6,37 @@ import { createColumnHelper } from '@tanstack/react-table'
 import DataTable from './components/DataTable'
 import { Box, Image, Text } from '@chakra-ui/react'
 import useImageModal from '~/hooks/useImageModal'
+import { HydrationBoundary, QueryClient, dehydrate, useQuery } from '@tanstack/react-query'
 
-export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const editorList = await fetchEditorList()
-  if (!editorList) {
-    throw new Response('Not Found', { status: 404 })
-  }
-  return json({ editorList })
+export const loader = async () => {
+  const queryClient = new QueryClient()
+
+  await queryClient.prefetchQuery({
+    queryKey: ['editorList'],
+    queryFn: fetchEditorList
+  })
+
+  return json({ dehydratedState: dehydrate(queryClient) })
 }
 
 const EditorList = () => {
-  const { editorList } = useLoaderData<typeof loader>()
+  const {
+    data: editorList,
+    isPending,
+    isError,
+    error
+  } = useQuery({
+    queryKey: ['editorList'],
+    queryFn: fetchEditorList
+  })
 
-  const data: Article[] = editorList.map((editor) => editor as Article)
+  if (isPending) {
+    return <Text>Loading...</Text>
+  }
+
+  if (isError) {
+    return <Text>Error: {error.message}</Text>
+  }
 
   const columnHelper = createColumnHelper<Article>()
 
@@ -82,7 +100,9 @@ const EditorList = () => {
             : 'gray.500'
 
         const getPublishDate = new Date(info.row.original.publishedAt)
-        const publishDateTimeString = `${getPublishDate.toLocaleDateString()}\n${getPublishDate.toLocaleTimeString()}`
+        const publishDateTimeString = `${getPublishDate.toLocaleDateString(
+          'en'
+        )}\n${getPublishDate.toLocaleTimeString('en')}`
         const publishDate = (info.getValue() === '已發布' || info.getValue() === '已排程') && (
           <Text as={'pre'}>{publishDateTimeString}</Text>
         )
@@ -102,7 +122,9 @@ const EditorList = () => {
     columnHelper.accessor('updatedAt', {
       cell: (info) => {
         const getUpdateDate = new Date(info.getValue())
-        const updateDateTimeString = `${getUpdateDate.toLocaleDateString()}\n${getUpdateDate.toLocaleTimeString()}`
+        const updateDateTimeString = `${getUpdateDate.toLocaleDateString(
+          'en'
+        )}\n${getUpdateDate.toLocaleTimeString('en')}`
         return <Text as={'pre'}>{updateDateTimeString}</Text>
       },
       header: '更新日期',
@@ -112,7 +134,15 @@ const EditorList = () => {
     })
   ]
 
-  return <DataTable columns={columns} data={data} />
+  return <DataTable columns={columns} data={editorList} />
 }
 
 export default EditorList
+// export default function EditorListRoute() {
+//   const { dehydratedState } = useLoaderData<typeof loader>()
+//   return (
+//     <HydrationBoundary state={dehydratedState}>
+//       <EditorList />
+//     </HydrationBoundary>
+//   )
+// }
