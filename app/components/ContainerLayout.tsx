@@ -18,6 +18,8 @@ const ContainerLayout = (props: Props) => {
       flexDirection={'column'}
       alignItems={'flex-start'}
       maxW={`calc(100vw - ${theme.styles.global.body.sidebarWidth})`}
+      maxH={'100vh'}
+      overflow={'hidden'}
     >
       {children}
     </Container>

@@ -25,6 +25,7 @@ import { ToastContainer, toast as notify } from 'react-toastify'
 import toastStyles from 'react-toastify/dist/ReactToastify.css'
 import { ModalProvider } from './hooks/useModals'
 import ContainerLayout from './components/ContainerLayout'
+import { ImageModalProvider } from './hooks/useImageModal'
 
 export let links: LinksFunction = () => [
   { rel: 'stylesheet', href: appStylesHref },
@@ -176,14 +177,15 @@ const styles = {
 }
 
 const theme = extendTheme({ colors, styles })
-// console.log('🚀 ~ file: root.tsx:180 ~ theme:', theme)
 
 export default function Root() {
   return (
     <Document>
       <ChakraProvider theme={theme}>
         <ModalProvider>
-          <Outlet />
+          <ImageModalProvider>
+            <Outlet />
+          </ImageModalProvider>
         </ModalProvider>
       </ChakraProvider>
     </Document>
